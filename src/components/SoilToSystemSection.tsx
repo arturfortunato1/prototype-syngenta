@@ -7,6 +7,16 @@ import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { assetUrl } from '../utils';
 
 const supportPoints = ['Mais contexto para decidir', 'Mais precisão para atuar', 'Mais consistência para produzir'];
+const integrationHighlights = [
+  {
+    title: 'Leitura multivariável',
+    description: 'Solo, planta e clima interpretados em conjunto para reduzir ruído na decisão.',
+  },
+  {
+    title: 'Resposta operacional',
+    description: 'Priorização técnica com visão de sistema para ganhar consistência ao longo do ciclo.',
+  },
+];
 const featuredLayerNames = new Set(['solo', 'planta', 'clima', 'decisao']);
 
 const openPositions = [
@@ -176,6 +186,15 @@ export function SoilToSystemSection() {
           <p className="mt-8 max-w-xl text-sm leading-relaxed text-white/80">
             Recomendação mais acionável quando os sinais do campo são lidos em conjunto, e não de forma isolada.
           </p>
+
+          <div className="mt-8 grid max-w-xl gap-6 md:grid-cols-2">
+            {integrationHighlights.map((item) => (
+              <article key={item.title} className="border-t border-white/25 pt-4">
+                <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/76">{item.description}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>
