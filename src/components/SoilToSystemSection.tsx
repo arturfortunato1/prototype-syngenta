@@ -9,12 +9,12 @@ import { assetUrl } from '../utils';
 const supportPoints = ['Mais contexto para decidir', 'Mais precisão para atuar', 'Mais consistência para produzir'];
 
 const openPositions = [
-  { left: '0%', top: '8%', rotate: -1.5 },
-  { left: '58%', top: '20%', rotate: 1.3 },
-  { left: '4%', top: '35%', rotate: -1 },
-  { left: '60%', top: '49%', rotate: 1.2 },
-  { left: '8%', top: '64%', rotate: -1.1 },
-  { left: '58%', top: '79%', rotate: 1.1 },
+  { left: '2%', top: '9%', rotate: -1.8 },
+  { left: '56%', top: '18%', rotate: 1.2 },
+  { left: '6%', top: '34%', rotate: -0.9 },
+  { left: '58%', top: '50%', rotate: 1.05 },
+  { left: '10%', top: '66%', rotate: -1.15 },
+  { left: '55%', top: '80%', rotate: 0.95 },
 ];
 
 export function SoilToSystemSection() {
@@ -40,8 +40,8 @@ export function SoilToSystemSection() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top 78%',
-          end: 'top 22%',
+          start: 'top 62%',
+          end: 'top 16%',
           scrub: 0.85,
         },
       });
@@ -72,7 +72,7 @@ export function SoilToSystemSection() {
         ease: 'power3.out',
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top 72%',
+          start: 'top 66%',
         },
       });
 
@@ -123,13 +123,19 @@ export function SoilToSystemSection() {
 
           {!isMobile ? (
             <div className="hidden lg:block">
-              {ecosystemLayers.map((layer) => (
+              {ecosystemLayers.map((layer, index) => (
                 <article
                   key={layer.name}
                   data-ecosystem-layer
-                  className="absolute w-[44%] max-w-[330px] min-w-[240px] rounded-2xl border border-white/30 bg-[#ffffff1c] px-5 py-4 backdrop-blur-md"
+                  className={`absolute min-w-[230px] rounded-2xl px-5 py-4 backdrop-blur-md ${
+                    index % 3 === 0
+                      ? 'w-[42%] max-w-[320px] border border-white/34 bg-white/[0.17] shadow-[0_18px_48px_rgba(2,12,25,0.24)]'
+                      : index % 3 === 1
+                        ? 'w-[40%] max-w-[300px] border border-white/22 bg-[#1f4c78]/55 shadow-[0_14px_38px_rgba(2,14,30,0.26)]'
+                        : 'w-[43%] max-w-[330px] border border-white/26 bg-white/[0.11] shadow-[0_12px_28px_rgba(2,14,30,0.2)]'
+                  }`}
                 >
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-syngenta-yellow/88">{layer.name}</p>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-syngenta-yellow/86">{layer.name}</p>
                   <h3 className="mt-2 font-heading text-2xl font-semibold leading-tight text-white">{layer.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-white/84">{layer.description}</p>
                 </article>

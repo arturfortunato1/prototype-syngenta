@@ -86,9 +86,7 @@ export function ImpactSection() {
 
       <div className="relative mx-auto w-full max-w-[1400px] px-6 md:px-10">
         <SectionHeading
-          eyebrow="Escala"
           title="Escala, ciência e presença no campo."
-          description="Indicadores abaixo são placeholders de protótipo e devem ser conectados a dados oficiais via CMS/config."
           titleClassName="text-white"
           className="max-w-3xl"
         />
