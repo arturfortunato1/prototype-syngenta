@@ -164,7 +164,7 @@ export function DigitalSection() {
   const activeStory = digitalSteps[activeStep];
 
   return (
-    <section id="agrotech" ref={sectionRef} className="relative overflow-hidden bg-[#eef4f9] py-24 md:py-32 lg:pb-0">
+    <section id="agrotech" ref={sectionRef} className="relative overflow-hidden bg-[#eef4f9] py-20 md:py-24 lg:pb-0">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(0,87,184,0.12),transparent_42%),radial-gradient(circle_at_85%_80%,rgba(120,190,32,0.12),transparent_36%)]" />
 
       <div className="relative mx-auto w-full max-w-[1400px] px-6 md:px-10">
@@ -205,14 +205,14 @@ export function DigitalSection() {
             </div>
           </div>
         ) : (
-          <div ref={storyRef} className="mt-14 min-h-[180vh]">
+          <div ref={storyRef} className="mt-12 min-h-[150vh]">
             <div className="sticky top-0 flex h-screen items-center">
               <div className="grid w-full gap-10 lg:grid-cols-[1.12fr_1fr] lg:items-center">
                 <div className="flex items-center justify-center">
                   <PlatformMockup activeStep={activeStep} activeStory={activeStory} activePanel={activePanel} />
                 </div>
 
-                <div className="relative h-[68vh] overflow-hidden">
+                <div className="relative h-[62vh] overflow-hidden">
                   {digitalSteps.map((step, index) => {
                     const number = String(index + 1).padStart(2, '0');
                     const isActive = activeStep === index;

@@ -142,12 +142,11 @@ export function SoilToSystemSection() {
                       ? 'w-[42%] max-w-[320px] border border-white/34 bg-white/[0.17] shadow-[0_18px_48px_rgba(2,12,25,0.24)]'
                       : index % 3 === 1
                         ? 'w-[40%] max-w-[300px] border border-white/22 bg-[#1f4c78]/55 shadow-[0_14px_38px_rgba(2,14,30,0.26)]'
-                        : 'w-[43%] max-w-[330px] border border-white/26 bg-white/[0.11] shadow-[0_12px_28px_rgba(2,14,30,0.2)]'
+                      : 'w-[43%] max-w-[330px] border border-white/26 bg-white/[0.11] shadow-[0_12px_28px_rgba(2,14,30,0.2)]'
                   }`}
                 >
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-syngenta-yellow/86">{layer.name}</p>
-                  <h3 className="mt-2 font-heading text-2xl font-semibold leading-tight text-white">{layer.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/84">{layer.description}</p>
+                  <h3 className="font-heading text-2xl font-semibold leading-tight text-white">{layer.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-white/84">{layer.description}</p>
                 </article>
               ))}
             </div>
@@ -158,9 +157,8 @@ export function SoilToSystemSection() {
                   key={layer.name}
                   className="rounded-2xl border border-white/22 bg-white/[0.1] p-4 backdrop-blur"
                 >
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-syngenta-yellow/88">{layer.name}</p>
-                  <h3 className="mt-2 font-heading text-xl font-semibold text-white">{layer.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/82">{layer.description}</p>
+                  <h3 className="font-heading text-xl font-semibold text-white">{layer.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-white/82">{layer.description}</p>
                 </article>
               ))}
             </div>
