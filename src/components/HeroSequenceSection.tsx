@@ -1,63 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { CTAButton } from './CTAButton';
 import { heroStages } from '../data/content';
-import { useMediaQuery } from '../hooks/useMediaQuery';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { lenisScrollTo } from '../hooks/useSmoothScroll';
 import { assetUrl } from '../utils';
 
-const TOTAL_FRAMES = 192;
 const PIN_MULTIPLIER = 5.3;
-
-/** Evenly sample `count` frame indices from [0, total-1], always including first and last. */
-function sampleFrameIndices(total: number, count: number): number[] {
-  const clamped = Math.max(2, Math.min(count, total));
-  const indices: number[] = [];
-  for (let i = 0; i < clamped; i++) {
-    indices.push(Math.round((i / (clamped - 1)) * (total - 1)));
-  }
-  return indices;
-}
-
-type WindowWithIdle = Window & {
-  requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
-  cancelIdleCallback?: (id: number) => void;
-};
-
-function framePath(frame: number) {
-  return assetUrl(`images/hero-sequence/frame_${String(frame).padStart(3, '0')}_delay-0.041s.webp`);
-}
-
-function drawImageCover(canvas: HTMLCanvasElement, image: HTMLImageElement) {
-  const context = canvas.getContext('2d');
-
-  if (!context) return;
-
-  const canvasWidth = canvas.width;
-  const canvasHeight = canvas.height;
-
-  const imageRatio = image.naturalWidth / image.naturalHeight;
-  const canvasRatio = canvasWidth / canvasHeight;
-
-  let drawWidth = canvasWidth;
-  let drawHeight = canvasHeight;
-
-  if (imageRatio > canvasRatio) {
-    drawHeight = canvasHeight;
-    drawWidth = drawHeight * imageRatio;
-  } else {
-    drawWidth = canvasWidth;
-    drawHeight = drawWidth / imageRatio;
-  }
-
-  const x = (canvasWidth - drawWidth) / 2;
-  const y = (canvasHeight - drawHeight) / 2;
-
-  context.clearRect(0, 0, canvasWidth, canvasHeight);
-  context.drawImage(image, x, y, drawWidth, drawHeight);
-}
 
 function goToSection(sectionId: string) {
   lenisScrollTo(`#${sectionId}`);
@@ -65,151 +16,37 @@ function goToSection(sectionId: string) {
 
 export function HeroSequenceSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const currentFrameRef = useRef(0);
-  const frameImagesRef = useRef<(HTMLImageElement | null)[]>([]);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const stageRef = useRef(0);
 
   const [activeStage, setActiveStage] = useState(0);
-
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  const isTablet = useMediaQuery('(max-width: 1100px)');
+  const [videoReady, setVideoReady] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  // 60% density on desktop (~115 frames), proportionally fewer on tablet/mobile
-  const targetFrames = isMobile ? 40 : isTablet ? 65 : 115;
-
-  const frameSources = useMemo(() => {
-    const indices = sampleFrameIndices(TOTAL_FRAMES, targetFrames);
-    return indices.map((i) => framePath(i));
-  }, [targetFrames]);
-
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    if (!video || prefersReducedMotion) return;
 
-    if (!canvas || prefersReducedMotion) return;
+    // Once enough data is buffered, mark as ready
+    const onCanPlay = () => setVideoReady(true);
+    video.addEventListener('canplaythrough', onCanPlay);
 
-    const context = canvas.getContext('2d');
-
-    if (!context) return;
-
-    frameImagesRef.current = Array.from({ length: frameSources.length }, () => null);
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-
-    const setCanvasSize = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-
-      const image = frameImagesRef.current[currentFrameRef.current];
-
-      if (image) {
-        drawImageCover(canvas, image);
-      }
-    };
-
-    const loadFrame = (index: number) =>
-      new Promise<void>((resolve) => {
-        if (frameImagesRef.current[index]) {
-          resolve();
-          return;
-        }
-
-        const image = new Image();
-        image.src = frameSources[index];
-
-        image.onload = () => {
-          frameImagesRef.current[index] = image;
-
-          if (index === 0 || index === currentFrameRef.current) {
-            drawImageCover(canvas, image);
-          }
-
-          resolve();
-        };
-
-        image.onerror = () => resolve();
-      });
-
-    const findClosestLoadedFrame = (index: number) => {
-      for (let offset = 0; offset < frameSources.length; offset += 1) {
-        const previous = index - offset;
-        const next = index + offset;
-
-        if (previous >= 0 && frameImagesRef.current[previous]) return previous;
-        if (next < frameSources.length && frameImagesRef.current[next]) return next;
-      }
-
-      return 0;
-    };
-
-    const renderFrame = (index: number) => {
-      const targetIndex = Math.max(0, Math.min(index, frameSources.length - 1));
-      const loadedIndex = frameImagesRef.current[targetIndex] ? targetIndex : findClosestLoadedFrame(targetIndex);
-      const image = frameImagesRef.current[loadedIndex];
-
-      if (image) {
-        currentFrameRef.current = loadedIndex;
-        drawImageCover(canvas, image);
-      }
-    };
-
-    // Load first frame immediately with high priority, then batch the rest
-    const initialBatch = Math.min(12, frameSources.length);
-
-    // Eagerly load frame 0 first for instant display
-    loadFrame(0).then(() => {
-      renderFrame(0);
-      // Then load remaining initial batch in parallel
-      Promise.all(Array.from({ length: initialBatch - 1 }, (_, i) => loadFrame(i + 1)));
-    });
-
-    let cancelled = false;
-    let idleCallbackId: number | null = null;
-    let timeoutId: number | null = null;
-    const idleWindow = window as WindowWithIdle;
-
-    const loadRemainingFrames = (index: number) => {
-      if (cancelled || index >= frameSources.length) return;
-
-      const scheduleNext = () => {
-        if (cancelled) return;
-        loadFrame(index).finally(() => loadRemainingFrames(index + 1));
-      };
-
-      if (typeof idleWindow.requestIdleCallback === 'function') {
-        idleCallbackId = idleWindow.requestIdleCallback(scheduleNext, { timeout: 150 });
-      } else {
-        timeoutId = window.setTimeout(scheduleNext, 32);
-      }
-    };
-
-    loadRemainingFrames(initialBatch);
-
-    setCanvasSize();
-    window.addEventListener('resize', setCanvasSize);
-
-    const frameController = { frame: 0 };
+    // Ensure the video is loaded and paused at frame 0
+    video.load();
 
     const trigger = ScrollTrigger.create({
       trigger: sectionRef.current,
       start: 'top top',
       end: () => `+=${window.innerHeight * PIN_MULTIPLIER}`,
-      scrub: 0.4,
+      scrub: 0.5,
       pin: true,
       onUpdate: (self) => {
-        frameController.frame = self.progress * (frameSources.length - 1);
-
-        const nextFrame = Math.round(frameController.frame);
-        renderFrame(nextFrame);
+        // Scrub video currentTime based on scroll progress
+        if (video.duration && isFinite(video.duration)) {
+          video.currentTime = self.progress * video.duration;
+        }
 
         const nextStage = self.progress < 0.36 ? 0 : self.progress < 0.74 ? 1 : 2;
-
         if (nextStage !== stageRef.current) {
           stageRef.current = nextStage;
           setActiveStage(nextStage);
@@ -217,21 +54,20 @@ export function HeroSequenceSection() {
       },
     });
 
+    // Fade in the video once ready
+    if (!prefersReducedMotion) {
+      gsap.fromTo(
+        video,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.4, delay: 0.1 },
+      );
+    }
+
     return () => {
-      cancelled = true;
-
-      if (idleCallbackId !== null && typeof idleWindow.cancelIdleCallback === 'function') {
-        idleWindow.cancelIdleCallback(idleCallbackId);
-      }
-
-      if (timeoutId !== null) {
-        window.clearTimeout(timeoutId);
-      }
-
-      window.removeEventListener('resize', setCanvasSize);
+      video.removeEventListener('canplaythrough', onCanPlay);
       trigger.kill();
     };
-  }, [frameSources, prefersReducedMotion]);
+  }, [prefersReducedMotion]);
 
   return (
     <section
@@ -248,7 +84,29 @@ export function HeroSequenceSection() {
           loading="eager"
         />
       ) : (
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        <>
+          {/* Static poster — shows instantly while video loads */}
+          <img
+            src={assetUrl('images/hero-sequence/frame_000_delay-0.041s.webp')}
+            alt=""
+            aria-hidden="true"
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+              videoReady ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            }`}
+            loading="eager"
+            fetchPriority="high"
+          />
+          {/* Scroll-scrubbed video — replaces 115 individual images with one 4MB file */}
+          <video
+            ref={videoRef}
+            className="absolute inset-0 h-full w-full object-cover"
+            src={assetUrl('images/hero-sequence.mp4')}
+            muted
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+          />
+        </>
       )}
 
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(242,201,76,0.18),transparent_35%),linear-gradient(180deg,rgba(8,20,40,0.72)_0%,rgba(8,20,40,0.36)_45%,rgba(8,20,40,0.76)_100%)]" />
