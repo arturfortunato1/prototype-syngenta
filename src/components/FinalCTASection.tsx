@@ -71,7 +71,7 @@ export function FinalCTASection() {
         loading="lazy"
       />
       <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(10,34,64,0.90),rgba(0,87,184,0.58)_45%,rgba(120,190,32,0.38))]" />
-      <div className="pointer-events-none absolute inset-0 bg-noise-soft bg-[size:5px_5px] opacity-[0.08]" />
+      {/* Noise overlay removed */}
 
       <div className="relative mx-auto w-full max-w-[1200px] px-6 text-center text-white md:px-10">
         <p className="mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-syngenta-yellow">Próximo passo</p>

@@ -108,7 +108,7 @@ export function SoilToSystemSection() {
       ref={sectionRef}
       data-section-blend="white-to-dark"
       data-section-blend-bottom="dark-to-eef"
-      className="relative overflow-hidden bg-[#031a35] py-24 text-white md:py-32"
+      className="relative overflow-hidden bg-[#031a35] py-16 text-white md:py-32"
     >
       <img
         data-soil-bg
@@ -119,21 +119,22 @@ export function SoilToSystemSection() {
       />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(130deg,rgba(3,26,53,0.9)_0%,rgba(4,40,84,0.88)_52%,rgba(4,53,96,0.86)_100%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(120,190,32,0.2),transparent_35%),radial-gradient(circle_at_85%_80%,rgba(0,87,184,0.32),transparent_42%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-noise-soft bg-[size:5px_5px] opacity-[0.08]" />
+      {/* Noise overlay removed */}
 
-      <div className="relative mx-auto grid w-full max-w-[1400px] gap-12 px-6 md:px-10 lg:grid-cols-[1.16fr_1fr] lg:items-start">
-        <div className="relative min-h-[760px] overflow-visible rounded-[36px] border border-white/20 bg-white/[0.04] p-3">
-          <div className="absolute left-1/2 top-14 h-[640px] w-[min(62%,720px)] -translate-x-1/2 overflow-hidden rounded-[32px] border border-white/22 bg-white/[0.08]">
-            <img
-              src={assetUrl('images/agro-system/agro-system.png')}
-              alt="Mapa visual do sistema no campo"
-              loading="lazy"
-              className="h-full w-full object-cover opacity-70"
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,25,51,0.28)_0%,rgba(4,25,51,0.6)_100%)]" />
-          </div>
+      <div className="relative mx-auto grid w-full max-w-[1400px] gap-8 px-6 md:gap-12 md:px-10 lg:grid-cols-[1.16fr_1fr] lg:items-start">
+        {/* Desktop: image with floating cards, no outer box */}
+        {!isMobile ? (
+          <div className="relative min-h-[760px] overflow-visible">
+            <div className="absolute left-1/2 top-0 h-[640px] w-[min(72%,720px)] -translate-x-1/2 overflow-hidden rounded-[32px] border border-white/22 bg-white/[0.08]">
+              <img
+                src={assetUrl('images/agro-system/agro-system.png')}
+                alt="Mapa visual do sistema no campo"
+                loading="lazy"
+                className="h-full w-full object-cover opacity-70"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,25,51,0.28)_0%,rgba(4,25,51,0.6)_100%)]" />
+            </div>
 
-          {!isMobile ? (
             <div className="hidden lg:block">
               {featuredLayers.map((layer, index) => (
                 <article
@@ -152,20 +153,33 @@ export function SoilToSystemSection() {
                 </article>
               ))}
             </div>
-          ) : (
-            <div className="relative z-10 space-y-3 pt-[360px]">
+          </div>
+        ) : (
+          /* Mobile: image then cards stacked, no outer box */
+          <div className="space-y-4">
+            <div className="overflow-hidden rounded-[20px] border border-white/22 bg-white/[0.08]">
+              <img
+                src={assetUrl('images/agro-system/agro-system.png')}
+                alt="Mapa visual do sistema no campo"
+                loading="lazy"
+                className="h-[240px] w-full object-cover opacity-70"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,25,51,0.28)_0%,rgba(4,25,51,0.6)_100%)]" />
+            </div>
+
+            <div className="space-y-3">
               {featuredLayers.map((layer) => (
                 <article
                   key={layer.name}
                   className="rounded-2xl border border-white/22 bg-white/[0.1] p-4 backdrop-blur"
                 >
                   <h3 className="font-heading text-xl font-semibold text-white">{layer.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-white/82">{layer.description}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-white/82">{layer.description}</p>
                 </article>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="relative z-10 lg:pt-6">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.22em] text-syngenta-yellow">Integração</p>

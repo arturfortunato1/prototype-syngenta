@@ -43,8 +43,8 @@ export function Footer() {
   }, [reducedMotion]);
 
   return (
-    <footer id="footer" ref={footerRef} className="relative border-t border-syngenta-deep/10 bg-white py-14">
-      <div className="mx-auto grid w-full max-w-[1400px] gap-10 px-6 md:px-10 lg:grid-cols-[1.2fr_2fr]">
+    <footer id="footer" ref={footerRef} className="relative border-t border-syngenta-deep/10 bg-white py-10 md:py-14">
+      <div className="mx-auto grid w-full max-w-[1400px] gap-8 px-6 md:gap-10 md:px-10 lg:grid-cols-[1.2fr_2fr]">
         <div data-footer-col>
           <img src={assetUrl('images/logo/Logo-novo.png')} alt="AgroTech" className="h-11 w-auto" />
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-syngenta-deep/72">
@@ -53,7 +53,7 @@ export function Footer() {
           <p className="mt-6 text-xs uppercase tracking-[0.2em] text-syngenta-blue/70">AgroTech Brasil</p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 md:gap-8">
           {footerColumns.map((column) => (
             <div key={column.title} data-footer-col>
               <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-syngenta-blue/70">

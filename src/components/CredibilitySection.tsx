@@ -44,7 +44,7 @@ function CredibilityCard({
     <div className="credibility-card group" style={{ willChange: 'transform, opacity' }}>
       <div
         ref={tiltRef}
-        className={`relative overflow-hidden rounded-3xl border border-syngenta-deep/8 bg-white/80 backdrop-blur-sm p-8 md:p-10 transition-colors duration-500 ${borderAccents[index % 3]} hover:bg-white`}
+        className={`relative overflow-hidden rounded-3xl border border-syngenta-deep/8 bg-white/80 backdrop-blur-sm p-6 md:p-10 transition-colors duration-500 ${borderAccents[index % 3]} hover:bg-white`}
         style={{ transformStyle: 'preserve-3d' }}
       >
         {/* Gradient accent top-bar */}
@@ -164,11 +164,10 @@ export function CredibilitySection() {
     <section
       ref={sectionRef}
       id="credibilidade"
-      className="relative overflow-hidden bg-syngenta-offwhite py-28 md:py-40"
+      className="relative overflow-hidden bg-syngenta-offwhite py-16 md:py-40"
     >
       {/* ── Background visual interest ──────────────────────── */}
-      {/* Noise overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-noise-soft opacity-40" />
+      {/* Noise overlay removed */}
 
       {/* Radial gradient top-left */}
       <div className="pointer-events-none absolute -left-40 -top-40 h-[600px] w-[600px] rounded-full bg-syngenta-blue/[0.04] blur-[100px]" />
@@ -176,11 +175,11 @@ export function CredibilitySection() {
       {/* Radial gradient bottom-right */}
       <div className="pointer-events-none absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-syngenta-green/[0.05] blur-[100px]" />
 
-      {/* Floating orbs */}
-      <div className="credibility-orb pointer-events-none absolute left-[15%] top-[20%] h-3 w-3 rounded-full bg-syngenta-blue/20" />
-      <div className="credibility-orb pointer-events-none absolute right-[20%] top-[30%] h-2 w-2 rounded-full bg-syngenta-green/25" />
-      <div className="credibility-orb pointer-events-none absolute left-[60%] bottom-[25%] h-4 w-4 rounded-full bg-syngenta-yellow/15" />
-      <div className="credibility-orb pointer-events-none absolute right-[35%] bottom-[15%] h-2.5 w-2.5 rounded-full bg-syngenta-blue/15" />
+      {/* Floating orbs — hidden on mobile */}
+      <div className="credibility-orb pointer-events-none absolute left-[15%] top-[20%] hidden h-3 w-3 rounded-full bg-syngenta-blue/20 md:block" />
+      <div className="credibility-orb pointer-events-none absolute right-[20%] top-[30%] hidden h-2 w-2 rounded-full bg-syngenta-green/25 md:block" />
+      <div className="credibility-orb pointer-events-none absolute left-[60%] bottom-[25%] hidden h-4 w-4 rounded-full bg-syngenta-yellow/15 md:block" />
+      <div className="credibility-orb pointer-events-none absolute right-[35%] bottom-[15%] hidden h-2.5 w-2.5 rounded-full bg-syngenta-blue/15 md:block" />
 
       <div className="relative z-10 mx-auto w-full max-w-[1400px] px-6 md:px-10">
         {/* ── Section heading ───────────────────────────────── */}
@@ -192,11 +191,11 @@ export function CredibilitySection() {
         />
 
         {/* ── Hero quote ────────────────────────────────────── */}
-        <div className="mt-16 md:mt-20">
+        <div className="mt-10 md:mt-20">
           <div className="relative max-w-4xl">
             {/* Large decorative quotation mark */}
             <span
-              className="pointer-events-none absolute -left-4 -top-8 font-heading text-[120px] font-bold leading-none text-syngenta-blue/[0.07] md:-left-8 md:-top-10 md:text-[180px]"
+              className="pointer-events-none absolute -left-4 -top-6 font-heading text-[80px] font-bold leading-none text-syngenta-blue/[0.07] md:-left-8 md:-top-10 md:text-[180px]"
               aria-hidden="true"
             >
               &ldquo;
@@ -221,7 +220,7 @@ export function CredibilitySection() {
         </div>
 
         {/* ── Connecting line ───────────────────────────────── */}
-        <div className="my-14 flex items-center justify-center md:my-20">
+        <div className="my-10 flex items-center justify-center md:my-20">
           <div
             ref={lineRef}
             className="h-[1px] w-full max-w-5xl origin-left bg-gradient-to-r from-transparent via-syngenta-blue/20 to-transparent"
@@ -236,7 +235,7 @@ export function CredibilitySection() {
         </div>
 
         {/* ── Bottom decorative accent ──────────────────────── */}
-        <div className="mt-16 flex items-center justify-center gap-3 md:mt-24">
+        <div className="mt-10 flex items-center justify-center gap-3 md:mt-24">
           <span className="h-1.5 w-1.5 rounded-full bg-syngenta-blue/30" />
           <span className="h-1.5 w-1.5 rounded-full bg-syngenta-green/30" />
           <span className="h-1.5 w-1.5 rounded-full bg-syngenta-yellow/30" />

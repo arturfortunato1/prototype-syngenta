@@ -76,7 +76,7 @@ export function ManifestSection() {
   }, [reducedMotion]);
 
   return (
-    <section id="manifesto" ref={sectionRef} className="relative bg-syngenta-offwhite py-24 md:py-28 overflow-hidden">
+    <section id="manifesto" ref={sectionRef} className="relative bg-syngenta-offwhite py-16 md:py-28 overflow-hidden">
       {/* ── Floating decorative elements ── */}
       {/* Top-left — large green ring */}
       <div
@@ -103,7 +103,7 @@ export function ManifestSection() {
         className="pointer-events-none absolute right-[18%] top-10 h-[24px] w-[24px] rounded-full bg-[#78be20] opacity-[0.1]"
       />
 
-      <div className="relative mx-auto grid w-full max-w-[1320px] gap-14 px-6 md:px-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
+      <div className="relative mx-auto grid w-full max-w-[1320px] gap-8 md:gap-14 px-6 md:px-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
         <div>
           <SectionHeading
             eyebrow="Visão integrada"
@@ -142,7 +142,7 @@ export function ManifestSection() {
             src={assetUrl('images/agro-integrado/agro-integrado.jpg')}
             alt="Detalhe de lavoura em alta definição"
             loading="lazy"
-            className="h-[440px] w-full object-cover"
+            className="h-[280px] md:h-[440px] w-full object-cover"
           />
         </figure>
       </div>

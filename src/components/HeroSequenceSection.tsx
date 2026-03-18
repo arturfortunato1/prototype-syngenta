@@ -109,8 +109,8 @@ export function HeroSequenceSection() {
         </>
       )}
 
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(242,201,76,0.18),transparent_35%),linear-gradient(180deg,rgba(8,20,40,0.72)_0%,rgba(8,20,40,0.36)_45%,rgba(8,20,40,0.76)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-noise-soft bg-[size:6px_6px] opacity-[0.15]" />
+      {/* Warm radial accent + dark gradient for text readability */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(242,201,76,0.18),transparent_35%),linear-gradient(180deg,rgba(8,20,40,0.58)_0%,rgba(8,20,40,0.22)_45%,rgba(8,20,40,0.62)_100%)]" />
 
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[1400px] items-center px-6 md:px-10">
         <div className="max-w-3xl">
@@ -128,16 +128,22 @@ export function HeroSequenceSection() {
                 aria-hidden={!isVisible}
               >
                 {stage.eyebrow ? (
-                  <p className="mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-syngenta-yellow">
+                  <p className="mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-syngenta-yellow" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.35)' }}>
                     {stage.eyebrow}
                   </p>
                 ) : null}
 
-                <HeadingTag className="font-heading text-4xl font-semibold leading-tight tracking-tight md:text-6xl lg:text-7xl">
+                <HeadingTag
+                  className="font-heading text-4xl font-semibold leading-tight tracking-tight md:text-6xl lg:text-7xl"
+                  style={{ textShadow: '0 2px 20px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.3)' }}
+                >
                   {stage.title}
                 </HeadingTag>
 
-                <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/86 md:text-xl">
+                <p
+                  className="mt-6 max-w-2xl text-base leading-relaxed text-white/90 md:text-xl"
+                  style={{ textShadow: '0 1px 12px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.25)' }}
+                >
                   {stage.description}
                 </p>
 

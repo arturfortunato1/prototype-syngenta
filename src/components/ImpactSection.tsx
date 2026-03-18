@@ -116,7 +116,7 @@ export function ImpactSection() {
   );
 
   return (
-    <section id="impacto" ref={sectionRef} data-section-blend="offwhite-to-dark" data-section-blend-bottom="dark-to-white" className="relative overflow-hidden bg-syngenta-deep py-24 text-white md:py-32">
+    <section id="impacto" ref={sectionRef} data-section-blend="offwhite-to-dark" data-section-blend-bottom="dark-to-white" className="relative overflow-hidden bg-syngenta-deep py-16 text-white md:py-32">
       <img
         data-impact-bg
         src={assetUrl('images/hero-sequence/frame_188_delay-0.041s.webp')}
@@ -133,20 +133,20 @@ export function ImpactSection() {
           className="max-w-3xl"
         />
 
-        <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 md:mt-12 md:gap-4 xl:grid-cols-4">
           {metrics.map((metric) => (
             <article
               key={metric.label}
-              className="rounded-3xl border border-white/15 bg-white/[0.04] p-6 backdrop-blur-sm transition-all duration-500 hover:border-white/25 hover:bg-white/[0.08] hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
+              className="rounded-2xl md:rounded-3xl border border-white/15 bg-white/[0.04] p-4 md:p-6 backdrop-blur-sm transition-all duration-500 hover:border-white/25 hover:bg-white/[0.08] hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
               data-impact-card
             >
-              <p className="font-heading text-4xl font-semibold tracking-tight text-white md:text-5xl">
+              <p className="font-heading text-2xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
                 {metric.displayValue}
               </p>
-              <p className="mt-4 text-sm font-semibold uppercase tracking-[0.16em] text-syngenta-yellow/90">
+              <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-syngenta-yellow/90 sm:mt-4 sm:text-sm sm:tracking-[0.16em]">
                 {metric.label}
               </p>
-              <p className="mt-4 border-t border-white/15 pt-4 text-xs leading-relaxed text-white/70">{metric.helper}</p>
+              <p className="mt-3 hidden border-t border-white/15 pt-3 text-xs leading-relaxed text-white/70 sm:block">{metric.helper}</p>
             </article>
           ))}
         </div>
