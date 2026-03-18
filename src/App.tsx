@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { Header } from './components/Header';
 import { HeroSequenceSection } from './components/HeroSequenceSection';
@@ -22,6 +23,25 @@ function App() {
   // ── Lenis smooth scroll (disabled when user prefers reduced motion) ──
   useSmoothScroll(!reducedMotion);
 
+
+  // ── ScrollTrigger refresh after mount (accounts for pinned sections + iOS resize) ──
+  useEffect(() => {
+    // Delay lets all components register their ScrollTriggers first
+    const id = setTimeout(() => ScrollTrigger.refresh(), 400);
+
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => ScrollTrigger.refresh(), 200);
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+
+    return () => {
+      clearTimeout(id);
+      clearTimeout(resizeTimer);
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
 
   // ── Scroll depth analytics tracking ──
   useEffect(() => {

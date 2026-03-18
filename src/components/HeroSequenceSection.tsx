@@ -73,7 +73,7 @@ export function HeroSequenceSection() {
     <section
       id="top"
       ref={sectionRef}
-      className="relative h-screen overflow-hidden bg-syngenta-deep text-white"
+      className="relative h-svh overflow-hidden bg-syngenta-deep text-white"
       aria-label="Transformação do campo por ciência e tecnologia"
     >
       {prefersReducedMotion ? (
@@ -128,7 +128,7 @@ export function HeroSequenceSection() {
                 aria-hidden={!isVisible}
               >
                 {stage.eyebrow ? (
-                  <p className="mb-5 text-xs font-semibold uppercase tracking-[0.24em] text-syngenta-yellow" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.35)' }}>
+                  <p className="mb-5 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-syngenta-yellow backdrop-blur-md" style={{ WebkitBackdropFilter: 'blur(12px)' }}>
                     {stage.eyebrow}
                   </p>
                 ) : null}

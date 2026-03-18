@@ -11,7 +11,6 @@ export function SolutionsHorizontalSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const cursorRef = useRef<HTMLDivElement | null>(null);
 
   const isMobile = useMediaQuery('(max-width: 1024px)');
   const reducedMotion = usePrefersReducedMotion();
@@ -55,34 +54,6 @@ export function SolutionsHorizontalSection() {
       );
     }, sectionRef);
 
-    const section = sectionRef.current;
-    const cursor = cursorRef.current;
-
-    if (section && cursor) {
-      const moveX = gsap.quickTo(cursor, 'x', { duration: 0.2, ease: 'power3.out' });
-      const moveY = gsap.quickTo(cursor, 'y', { duration: 0.2, ease: 'power3.out' });
-
-      const onMove = (event: MouseEvent) => {
-        const rect = section.getBoundingClientRect();
-        moveX(event.clientX - rect.left);
-        moveY(event.clientY - rect.top);
-        cursor.style.opacity = '1';
-      };
-
-      const onLeave = () => {
-        cursor.style.opacity = '0';
-      };
-
-      section.addEventListener('mousemove', onMove);
-      section.addEventListener('mouseleave', onLeave);
-
-      return () => {
-        section.removeEventListener('mousemove', onMove);
-        section.removeEventListener('mouseleave', onLeave);
-        context.revert();
-      };
-    }
-
     return () => context.revert();
   }, [isMobile, reducedMotion]);
 
@@ -121,11 +92,6 @@ export function SolutionsHorizontalSection() {
         </div>
       ) : (
         <div className="relative mt-16">
-          <div
-            ref={cursorRef}
-            className="pointer-events-none absolute left-0 top-0 z-30 hidden h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-syngenta-blue/25 bg-syngenta-blue/5 opacity-0 backdrop-blur-md transition-opacity lg:block"
-          />
-
           <div ref={viewportRef} className="overflow-hidden px-6 md:px-10">
             <div ref={trackRef} className="flex items-stretch gap-6">
               {solutionCards.map((card) => (
@@ -140,12 +106,12 @@ export function SolutionsHorizontalSection() {
                   loading="lazy"
                   className="h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,34,64,0.05)_0%,rgba(10,34,64,0.75)_80%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,34,64,0.02)_0%,rgba(10,34,64,0.55)_55%,rgba(10,34,64,0.92)_100%)]" />
                 <div className="absolute bottom-0 p-10 md:p-12">
                   <h3 className="font-heading text-3xl font-semibold leading-tight text-white md:text-4xl">
                     {card.title}
                   </h3>
-                  <p className="mt-5 max-w-xl text-base leading-relaxed text-white/88">{card.description}</p>
+                  <p className="mt-5 max-w-xl text-base leading-relaxed text-white/95 drop-shadow-sm">{card.description}</p>
                 </div>
               </article>
             ))}

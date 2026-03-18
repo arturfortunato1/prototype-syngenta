@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 type TextRevealProps = {
   children: string;
@@ -31,9 +32,12 @@ export function TextReveal({
 }: TextRevealProps) {
   const containerRef = useRef<HTMLElement | null>(null);
   const reducedMotion = usePrefersReducedMotion();
+  // On touch devices (iOS/Android) GSAP ScrollTrigger positions can be miscalculated
+  // after pinned sections, causing words to stay invisible. Skip animation on touch.
+  const isTouchDevice = useMediaQuery('(hover: none) and (pointer: coarse)');
 
   useEffect(() => {
-    if (reducedMotion || !containerRef.current) return;
+    if (reducedMotion || isTouchDevice || !containerRef.current) return;
 
     const el = containerRef.current;
     const units = el.querySelectorAll<HTMLElement>('[data-reveal-unit]');
@@ -58,19 +62,19 @@ export function TextReveal({
     }, el);
 
     return () => context.revert();
-  }, [reducedMotion, duration, stagger, start, delay]);
+  }, [reducedMotion, isTouchDevice, duration, stagger, start, delay]);
 
   // Split the text into units, preserving spaces
   const units = splitBy === 'chars'
     ? children.split('').map((char, i) => (
-        <span key={i} className="inline-block overflow-hidden">
+        <span key={i} className="inline-block overflow-hidden pb-[0.2em] mb-[-0.2em]">
           <span data-reveal-unit className="inline-block" style={{ willChange: 'transform' }}>
             {char === ' ' ? '\u00A0' : char}
           </span>
         </span>
       ))
     : children.split(' ').map((word, i) => (
-        <span key={i} className="inline-block overflow-hidden mr-[0.25em] last:mr-0">
+        <span key={i} className="inline-block overflow-hidden mr-[0.25em] last:mr-0 pb-[0.2em] mb-[-0.2em]">
           <span data-reveal-unit className="inline-block" style={{ willChange: 'transform' }}>
             {word}
           </span>
