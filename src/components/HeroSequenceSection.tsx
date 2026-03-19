@@ -51,6 +51,7 @@ export function HeroSequenceSection() {
       end: () => `+=${window.innerHeight * PIN_MULTIPLIER}`,
       scrub: 0.5,
       pin: true,
+      invalidateOnRefresh: true,
       onUpdate: (self) => {
         // Scrub video currentTime based on scroll progress
         if (video.duration && isFinite(video.duration)) {
@@ -85,7 +86,7 @@ export function HeroSequenceSection() {
     <section
       id="top"
       ref={sectionRef}
-      className="relative h-svh overflow-hidden bg-syngenta-deep text-white"
+      className="relative h-[100dvh] min-h-[100svh] overflow-hidden bg-syngenta-deep text-white"
       aria-label="Transformação do campo por ciência e tecnologia"
     >
       {useStaticFallback ? (
@@ -128,7 +129,7 @@ export function HeroSequenceSection() {
       {/* Warm radial accent + dark gradient for text readability */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(242,201,76,0.18),transparent_35%),linear-gradient(180deg,rgba(8,20,40,0.58)_0%,rgba(8,20,40,0.22)_45%,rgba(8,20,40,0.62)_100%)]" />
 
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-[1400px] items-center px-6 md:px-10">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-[1400px] items-center px-6 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-[calc(env(safe-area-inset-top)+4.75rem)] md:px-10 md:pb-0 md:pt-0">
         <div className="max-w-3xl">
           {heroStages.map((stage, index) => {
             const isVisible = activeStage === index;
@@ -164,7 +165,7 @@ export function HeroSequenceSection() {
                 </p>
 
                 {stage.ctaPrimary || stage.ctaSecondary ? (
-                  <div className="pointer-events-auto mt-10 flex flex-wrap gap-3">
+                  <div className="pointer-events-auto mt-8 flex flex-wrap gap-3 md:mt-10">
                     {stage.ctaPrimary ? (
                       <CTAButton
                         variant="primary"
