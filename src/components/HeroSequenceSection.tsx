@@ -9,7 +9,7 @@ import { lenisScrollTo } from '../hooks/useSmoothScroll';
 import { assetUrl } from '../utils';
 
 const PIN_MULTIPLIER = 5.3;
-const ANDROID_FRAME_STEP = 1 / 18;
+const ANDROID_FRAME_STEP = 1 / 24;
 
 function goToSection(sectionId: string) {
   lenisScrollTo(`#${sectionId}`);
@@ -20,6 +20,8 @@ export function HeroSequenceSection() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const stageRef = useRef(0);
   const lastScrubbedTimeRef = useRef(0);
+  const androidTargetTimeRef = useRef(0);
+  const androidSmoothTimeRef = useRef(0);
 
   const [activeStage, setActiveStage] = useState(0);
   const [videoReady, setVideoReady] = useState(false);
@@ -38,6 +40,8 @@ export function HeroSequenceSection() {
     const onPlayable = () => {
       setVideoReady(true);
       lastScrubbedTimeRef.current = 0;
+      androidTargetTimeRef.current = 0;
+      androidSmoothTimeRef.current = 0;
       video.pause();
     };
     video.addEventListener('loadeddata', onPlayable);
@@ -54,7 +58,7 @@ export function HeroSequenceSection() {
       trigger: sectionRef.current,
       start: 'top top',
       end: () => `+=${window.innerHeight * PIN_MULTIPLIER}`,
-      scrub: 0.5,
+      scrub: isAndroid ? 0.8 : 0.5,
       pin: true,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
@@ -63,25 +67,9 @@ export function HeroSequenceSection() {
           const targetTime = self.progress * video.duration;
 
           // Android decoders can jitter when seeking every tiny delta.
-          // Snap seeks to a frame step and use fastSeek when available.
+          // Keep scroll updates lightweight, then smooth/snap via ticker.
           if (isAndroid) {
-            const frameStep = ANDROID_FRAME_STEP;
-            const isEdgeFrame = self.progress <= 0.001 || self.progress >= 0.999;
-            const snappedTime = Math.max(0, Math.min(video.duration, Math.round(targetTime / frameStep) * frameStep));
-
-            if (isEdgeFrame || Math.abs(snappedTime - lastScrubbedTimeRef.current) >= frameStep) {
-              lastScrubbedTimeRef.current = snappedTime;
-              try {
-                const maybeFastSeek = (video as HTMLVideoElement & { fastSeek?: (time: number) => void }).fastSeek;
-                if (typeof maybeFastSeek === 'function') {
-                  maybeFastSeek(snappedTime);
-                } else {
-                  video.currentTime = snappedTime;
-                }
-              } catch {
-                video.currentTime = snappedTime;
-              }
-            }
+            androidTargetTimeRef.current = targetTime;
           } else {
             video.currentTime = targetTime;
           }
@@ -104,9 +92,44 @@ export function HeroSequenceSection() {
       );
     }
 
+    const androidTick = () => {
+      if (!isAndroid || !video.duration || !isFinite(video.duration)) return;
+
+      const target = androidTargetTimeRef.current;
+      const current = androidSmoothTimeRef.current;
+      const next = current + (target - current) * 0.35;
+      const snappedTime = Math.max(
+        0,
+        Math.min(video.duration, Math.round(next / ANDROID_FRAME_STEP) * ANDROID_FRAME_STEP),
+      );
+
+      androidSmoothTimeRef.current = next;
+
+      if (Math.abs(snappedTime - lastScrubbedTimeRef.current) >= ANDROID_FRAME_STEP * 0.95) {
+        lastScrubbedTimeRef.current = snappedTime;
+        try {
+          const maybeFastSeek = (video as HTMLVideoElement & { fastSeek?: (time: number) => void }).fastSeek;
+          if (typeof maybeFastSeek === 'function') {
+            maybeFastSeek(snappedTime);
+          } else {
+            video.currentTime = snappedTime;
+          }
+        } catch {
+          video.currentTime = snappedTime;
+        }
+      }
+    };
+
+    if (isAndroid) {
+      gsap.ticker.add(androidTick);
+    }
+
     return () => {
       video.removeEventListener('loadeddata', onPlayable);
       video.removeEventListener('canplay', onPlayable);
+      if (isAndroid) {
+        gsap.ticker.remove(androidTick);
+      }
       trigger.kill();
     };
   }, [prefersReducedMotion, isAndroid]);
