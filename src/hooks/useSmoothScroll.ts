@@ -14,6 +14,7 @@ export function useSmoothScroll(enabled = true) {
 
   useEffect(() => {
     if (!enabled) return;
+    const isAndroid = /Android/i.test(navigator.userAgent);
 
     const lenis = new Lenis({
       duration: 0.8,
@@ -22,7 +23,7 @@ export function useSmoothScroll(enabled = true) {
       gestureOrientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 1.8,
-      touchMultiplier: 2,
+      touchMultiplier: isAndroid ? 1.2 : 2,
     });
 
     lenisRef.current = lenis;

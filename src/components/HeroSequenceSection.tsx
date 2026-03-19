@@ -9,8 +9,71 @@ import { lenisScrollTo } from '../hooks/useSmoothScroll';
 import { assetUrl } from '../utils';
 
 const PIN_MULTIPLIER = 5.3;
-const ANDROID_FRAME_STEP = 1 / 20;
-const ANDROID_SMOOTHING = 0.22;
+
+type AndroidPerfTier = 'high' | 'mid' | 'low';
+
+type AndroidProfile = {
+  fps: number;
+  frameStep: number;
+  smoothing: number;
+  scrub: number;
+};
+
+type NavigatorWithPerf = Navigator & {
+  deviceMemory?: number;
+  connection?: {
+    saveData?: boolean;
+  };
+};
+
+type VideoWithRVFC = HTMLVideoElement & {
+  requestVideoFrameCallback?: (
+    callback: (now: number, metadata: VideoFrameCallbackMetadata) => void,
+  ) => number;
+  cancelVideoFrameCallback?: (handle: number) => void;
+};
+
+const ANDROID_PROFILES: Record<AndroidPerfTier, AndroidProfile> = {
+  high: {
+    fps: 30,
+    frameStep: 1 / 24,
+    smoothing: 0.26,
+    scrub: 0.75,
+  },
+  mid: {
+    fps: 24,
+    frameStep: 1 / 20,
+    smoothing: 0.22,
+    scrub: 0.95,
+  },
+  low: {
+    fps: 20,
+    frameStep: 1 / 16,
+    smoothing: 0.18,
+    scrub: 1.1,
+  },
+};
+
+function getAndroidPerfTier(): AndroidPerfTier {
+  if (typeof navigator === 'undefined') return 'mid';
+
+  const nav = navigator as NavigatorWithPerf;
+  const saveData = Boolean(nav.connection?.saveData);
+  const memory = nav.deviceMemory;
+  const cores = nav.hardwareConcurrency ?? 4;
+
+  if (saveData) return 'low';
+
+  if (typeof memory === 'number') {
+    if (memory >= 6 && cores >= 8) return 'high';
+    if (memory <= 3 || cores <= 4) return 'low';
+    return 'mid';
+  }
+
+  if (cores >= 8) return 'high';
+  if (cores <= 4) return 'low';
+  return 'mid';
+}
 
 function goToSection(sectionId: string) {
   lenisScrollTo(`#${sectionId}`);
@@ -27,14 +90,16 @@ export function HeroSequenceSection() {
   const [activeStage, setActiveStage] = useState(0);
   const [videoReady, setVideoReady] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
-  const isAndroid =
-    typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+  const androidTier = isAndroid ? getAndroidPerfTier() : null;
+  const androidProfile = androidTier ? ANDROID_PROFILES[androidTier] : null;
   // Keep static fallback only for explicit reduced-motion users.
   const useStaticFallback = prefersReducedMotion;
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || prefersReducedMotion) return;
+    const androidVideo = video as VideoWithRVFC;
 
     // On mobile, `canplaythrough` may never fire. Use `loadeddata` / `canplay`
     // so the poster can disappear as soon as frames are seekable.
@@ -59,7 +124,7 @@ export function HeroSequenceSection() {
       trigger: sectionRef.current,
       start: 'top top',
       end: () => `+=${window.innerHeight * PIN_MULTIPLIER}`,
-      scrub: isAndroid ? 1 : 0.5,
+      scrub: androidProfile ? androidProfile.scrub : 0.5,
       pin: true,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
@@ -69,7 +134,7 @@ export function HeroSequenceSection() {
 
           // Android decoders can jitter when seeking every tiny delta.
           // Keep scroll updates lightweight, then smooth/snap via ticker.
-          if (isAndroid) {
+          if (androidProfile) {
             androidTargetTimeRef.current = targetTime;
           } else {
             video.currentTime = targetTime;
@@ -93,20 +158,28 @@ export function HeroSequenceSection() {
       );
     }
 
-    const androidTick = () => {
-      if (!isAndroid || !video.duration || !isFinite(video.duration)) return;
+    let rafId = 0;
+    let rvfcId = 0;
+    let lastSeekTimestamp = 0;
+
+    const seekAndroidFrame = (now: number) => {
+      if (!androidProfile || !video.duration || !isFinite(video.duration)) return;
+
+      const minDeltaMs = 1000 / androidProfile.fps;
+      if (now - lastSeekTimestamp < minDeltaMs) return;
+      lastSeekTimestamp = now;
 
       const target = androidTargetTimeRef.current;
       const current = androidSmoothTimeRef.current;
-      const next = current + (target - current) * ANDROID_SMOOTHING;
+      const next = current + (target - current) * androidProfile.smoothing;
       const snappedTime = Math.max(
         0,
-        Math.min(video.duration, Math.round(next / ANDROID_FRAME_STEP) * ANDROID_FRAME_STEP),
+        Math.min(video.duration, Math.round(next / androidProfile.frameStep) * androidProfile.frameStep),
       );
 
       androidSmoothTimeRef.current = next;
 
-      if (Math.abs(snappedTime - lastScrubbedTimeRef.current) >= ANDROID_FRAME_STEP * 1.4) {
+      if (Math.abs(snappedTime - lastScrubbedTimeRef.current) >= androidProfile.frameStep * 0.95) {
         lastScrubbedTimeRef.current = snappedTime;
         try {
           const maybeFastSeek = (video as HTMLVideoElement & { fastSeek?: (time: number) => void }).fastSeek;
@@ -121,19 +194,40 @@ export function HeroSequenceSection() {
       }
     };
 
-    if (isAndroid) {
-      gsap.ticker.add(androidTick);
+    if (androidProfile) {
+      const runRaf = (time: number) => {
+        seekAndroidFrame(time);
+        rafId = window.requestAnimationFrame(runRaf);
+      };
+
+      const runRvfc = (now: number) => {
+        seekAndroidFrame(now);
+        if (typeof androidVideo.requestVideoFrameCallback === 'function') {
+          rvfcId = androidVideo.requestVideoFrameCallback(runRvfc);
+        }
+      };
+
+      if (typeof androidVideo.requestVideoFrameCallback === 'function') {
+        rvfcId = androidVideo.requestVideoFrameCallback(runRvfc);
+      } else {
+        rafId = window.requestAnimationFrame(runRaf);
+      }
     }
 
     return () => {
       video.removeEventListener('loadeddata', onPlayable);
       video.removeEventListener('canplay', onPlayable);
-      if (isAndroid) {
-        gsap.ticker.remove(androidTick);
+      if (androidProfile) {
+        if (rafId) {
+          window.cancelAnimationFrame(rafId);
+        }
+        if (rvfcId && typeof androidVideo.cancelVideoFrameCallback === 'function') {
+          androidVideo.cancelVideoFrameCallback(rvfcId);
+        }
       }
       trigger.kill();
     };
-  }, [prefersReducedMotion, isAndroid]);
+  }, [prefersReducedMotion, androidProfile]);
 
   return (
     <section
@@ -169,7 +263,7 @@ export function HeroSequenceSection() {
           <video
             ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover"
-            src={assetUrl('images/hero-sequence.mp4')}
+            src={assetUrl(androidTier === 'low' ? 'images/hero-sequence-mobile.mp4' : 'images/hero-sequence.mp4')}
             muted
             autoPlay
             playsInline
