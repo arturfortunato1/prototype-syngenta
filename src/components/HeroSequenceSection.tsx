@@ -18,10 +18,13 @@ export function HeroSequenceSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const stageRef = useRef(0);
+  const lastScrubbedTimeRef = useRef(0);
 
   const [activeStage, setActiveStage] = useState(0);
   const [videoReady, setVideoReady] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const isAndroid =
+    typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   // Keep static fallback only for explicit reduced-motion users.
   const useStaticFallback = prefersReducedMotion;
 
@@ -33,6 +36,7 @@ export function HeroSequenceSection() {
     // so the poster can disappear as soon as frames are seekable.
     const onPlayable = () => {
       setVideoReady(true);
+      lastScrubbedTimeRef.current = 0;
       video.pause();
     };
     video.addEventListener('loadeddata', onPlayable);
@@ -55,7 +59,21 @@ export function HeroSequenceSection() {
       onUpdate: (self) => {
         // Scrub video currentTime based on scroll progress
         if (video.duration && isFinite(video.duration)) {
-          video.currentTime = self.progress * video.duration;
+          const targetTime = self.progress * video.duration;
+
+          // Android decoders can jitter when seeking every tiny delta.
+          // Step by frame-size deltas (24fps source) using a lighter mobile encode.
+          if (isAndroid) {
+            const frameStep = 1 / 24;
+            const isEdgeFrame = self.progress <= 0.001 || self.progress >= 0.999;
+
+            if (isEdgeFrame || Math.abs(targetTime - lastScrubbedTimeRef.current) >= frameStep) {
+              lastScrubbedTimeRef.current = targetTime;
+              video.currentTime = targetTime;
+            }
+          } else {
+            video.currentTime = targetTime;
+          }
         }
 
         const nextStage = self.progress < 0.36 ? 0 : self.progress < 0.74 ? 1 : 2;
@@ -80,7 +98,7 @@ export function HeroSequenceSection() {
       video.removeEventListener('canplay', onPlayable);
       trigger.kill();
     };
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, isAndroid]);
 
   return (
     <section
@@ -116,7 +134,7 @@ export function HeroSequenceSection() {
           <video
             ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover"
-            src={assetUrl('images/hero-sequence.mp4')}
+            src={assetUrl(isAndroid ? 'images/hero-sequence-mobile.mp4' : 'images/hero-sequence.mp4')}
             muted
             autoPlay
             playsInline
