@@ -9,6 +9,7 @@ import { lenisScrollTo } from '../hooks/useSmoothScroll';
 import { assetUrl } from '../utils';
 
 const PIN_MULTIPLIER = 5.3;
+const ANDROID_FRAME_STEP = 1 / 18;
 
 function goToSection(sectionId: string) {
   lenisScrollTo(`#${sectionId}`);
@@ -62,14 +63,24 @@ export function HeroSequenceSection() {
           const targetTime = self.progress * video.duration;
 
           // Android decoders can jitter when seeking every tiny delta.
-          // Step by frame-size deltas (24fps source) using a lighter mobile encode.
+          // Snap seeks to a frame step and use fastSeek when available.
           if (isAndroid) {
-            const frameStep = 1 / 24;
+            const frameStep = ANDROID_FRAME_STEP;
             const isEdgeFrame = self.progress <= 0.001 || self.progress >= 0.999;
+            const snappedTime = Math.max(0, Math.min(video.duration, Math.round(targetTime / frameStep) * frameStep));
 
-            if (isEdgeFrame || Math.abs(targetTime - lastScrubbedTimeRef.current) >= frameStep) {
-              lastScrubbedTimeRef.current = targetTime;
-              video.currentTime = targetTime;
+            if (isEdgeFrame || Math.abs(snappedTime - lastScrubbedTimeRef.current) >= frameStep) {
+              lastScrubbedTimeRef.current = snappedTime;
+              try {
+                const maybeFastSeek = (video as HTMLVideoElement & { fastSeek?: (time: number) => void }).fastSeek;
+                if (typeof maybeFastSeek === 'function') {
+                  maybeFastSeek(snappedTime);
+                } else {
+                  video.currentTime = snappedTime;
+                }
+              } catch {
+                video.currentTime = snappedTime;
+              }
             }
           } else {
             video.currentTime = targetTime;
@@ -134,7 +145,7 @@ export function HeroSequenceSection() {
           <video
             ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover"
-            src={assetUrl(isAndroid ? 'images/hero-sequence-mobile.mp4' : 'images/hero-sequence.mp4')}
+            src={assetUrl('images/hero-sequence.mp4')}
             muted
             autoPlay
             playsInline
